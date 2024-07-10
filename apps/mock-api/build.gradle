@@ -1,0 +1,66 @@
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'distribution'
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url 'https://repo.spring.io/milestone' }
+        maven { url 'https://repository.apache.org/content/repositories/snapshots/' }
+    }
+
+    dependencies {
+        classpath('org.springframework.boot:spring-boot-gradle-plugin:2.7.16')
+    }
+}
+
+dependencies {
+    implementation project(':shared').sourceSets.main.output
+    implementation project(':shared').sourceSets.test.output
+
+    implementation project(':mock_bounded_context').sourceSets.main.output
+    implementation project(":mock_bounded_context").sourceSets.test.output
+}
+
+test {
+    useJUnitPlatform()
+
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+sourceSets {
+    main {
+        java { srcDirs = ['main'] }
+        resources {
+            srcDirs = ['main/resources']
+
+        }
+    }
+    test {
+        java { srcDirs = ['test'] }
+        resources {
+            srcDirs = ['test/resources']
+        }
+    }
+}
+
+bootJar {
+    archiveFileName = 'mock-app.jar'
+    archiveBaseName = 'mock-app'
+    mainClass = 'com.mock.BackendApplication'
+}
+
+distributions {
+    main {
+        distributionBaseName = 'mock-app'
+        contents {
+            from('main/com/mock/apps')
+        }
+    }
+}
+

@@ -1,0 +1,87 @@
+apply plugin: 'java'
+apply plugin: 'io.spring.dependency-management'
+
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url 'https://repo.spring.io/milestone' }
+        maven { url 'https://repository.apache.org/content/repositories/snapshots/' }
+    }
+    dependencies {
+        classpath('org.springframework.boot:spring-boot-gradle-plugin:2.7.16')
+    }
+}
+
+allprojects {
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'java-library'
+
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+
+    group = "com.mock.${rootProject.name}"
+
+    repositories {
+        mavenCentral()
+        maven { url 'https://repo.spring.io/milestone' }
+        maven { url 'https://repository.apache.org/content/repositories/snapshots/' }
+    }
+
+    test {
+        useJUnitPlatform()
+
+        testLogging {
+            events "passed", "skipped", "failed"
+        }
+    }
+
+    dependencies {
+        api('org.springframework.boot:spring-boot-starter-web:2.7.16')
+        api('org.springframework.boot:spring-boot-starter-test:2.7.16')
+        api 'org.springframework:spring-context-support:5.2.1.RELEASE'
+        api('com.github.javafaker:javafaker:1.0.2') { exclude module: "snakeyaml" }
+        api 'org.springframework:spring-test:5.3.12'
+        api 'com.fasterxml.jackson.core:jackson-databind:2.13.5'
+        api 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+        api 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+        api 'org.springframework:spring-context-support:5.2.1.RELEASE'
+        api 'org.mockito:mockito-core:2.22.0'
+        api 'org.reflections:reflections:0.10.2'
+    }
+}
+
+subprojects {
+    apply plugin: "java"
+    apply plugin: 'io.spring.dependency-management'
+
+    group = "com.mock.${rootProject.name}"
+
+    sourceSets {
+        main {
+            java { srcDirs = ['main'] }
+            resources { srcDirs = ['main/resources'] }
+        }
+
+        test {
+            java { srcDirs = ['test'] }
+            resources { srcDirs = ['test/resources'] }
+        }
+    }
+
+    jar {
+        enabled = true
+        from { sourceSets.main.output + sourceSets.test.output }
+    }
+
+    dependencies {
+        api('org.springframework.boot:spring-boot-starter-web:2.7.16')
+        api rootProject.sourceSets.main.output
+        api('org.springframework.boot:spring-boot-starter-test:2.7.16')
+
+        if (project.name != "shared") {
+            api project(":shared")
+            api project(":shared").sourceSets.test.output
+        }
+    }
+}

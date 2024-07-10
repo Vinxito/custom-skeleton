@@ -1,0 +1,10 @@
+rootProject.name = 'app_mock'
+
+include ':mock_bounded_context'
+project(':mock_bounded_context').projectDir = new File('src/mock_bounded_context')
+
+
+include ':shared'
+project(':shared').projectDir = new File('src/shared')
+
+include ':apps:mock-api'
